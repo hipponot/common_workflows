@@ -1,0 +1,77 @@
+name: check_for_changes
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      pattern_list:
+        description: "List of apps to check for changes"
+        type: string
+        default: |
+          foo,bar,baz
+    outputs:
+      app_matrix:
+        description: "List of apps to deploy"
+        value: ${{ jobs.check_for_changes.outputs.app_matrix }}
+
+env:
+  AWS_REGION: "us-west-2"
+
+# Permission can be added at job level or workflow level
+permissions:
+  id-token: write # This is required for requesting the JWT
+  contents: read # This is required for actions/checkout
+
+jobs:
+  check_for_changes:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: "check_for_changes lambda - ${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
+      cancel-in-progress: true
+    timeout-minutes: 5
+    outputs:
+      app_matrix: ${{ steps.changes_in_app.outputs.app_matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        if: github.event_name != 'pull_request'
+        with:
+          ref: main
+          fetch-depth: 2
+      - uses: actions/checkout@v4
+        if: github.event_name == 'pull_request'
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/checkout@v4
+        if: github.event_name != 'pull_request'
+        with:
+          fetch-depth: 2
+      - uses: actions/checkout@v4
+        if: github.event_name == 'pull_request'
+        with:
+          fetch-depth: 1
+      - name: Gather files changed
+        id: get_diff_files
+        run: |
+          if [ ${{ github.event_name }} == "pull_request" ]; then
+            git diff --name-only origin/main ${{ github.sha }} > /tmp/changed_files.txt
+            echo "Diff between origin/main and ${{ github.sha }}"
+          else
+            git diff --name-only ${{ github.event.before }} ${{ github.sha }} > /tmp/changed_files.txt
+            echo "Diff between ${{ github.event.before }} and ${{ github.sha }}"
+          fi
+      - name: check for changes in app
+        id: changes_in_app
+        run: |
+          pattern_list=${{ inputs.pattern_list }}
+          IFS=', ' read -r -a app_array <<< "$pattern_list"
+          app_matrix=""
+          for app in ${app_array[@]}; do
+            if grep -q $app /tmp/changed_files.txt; then
+              app_matrix="$app_matrix,\"$app\""
+              echo $(grep -q $app /tmp/changed_files.txt)
+            fi
+          done
+          app_matrix=$(echo $app_matrix | sed 's/^,//g')
+          echo app_matrix: [$app_matrix]
+          echo "app_matrix=[$app_matrix]" >> $GITHUB_OUTPUT
