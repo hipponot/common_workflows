@@ -1,0 +1,38 @@
+name: python_lint
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+        python-version:
+            type: string
+            description: 'Python version'
+            required: true
+            default: '3.11'
+jobs:
+    lint:
+        if: github.action != 'closed'
+        runs-on: ubuntu-latest
+        concurrency:
+            group: 'pr-trigger ${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+            cancel-in-progress: true
+        timeout-minutes: 5
+        steps:
+        - uses: actions/checkout@v4
+        - name: Set up Python ${{ inputs.python-version }}
+          id: py_setup
+          uses: actions/setup-python@v5
+          with:
+            python-version: ${{ inputs.python-version }}
+            cache: 'pip'
+        - name: Install ruff
+          run: |
+            python -m pip install --upgrade pip
+            pip install ruff
+        - name: Lint with ruff
+          run: |
+            # stop the build if there are Python syntax errors or undefined names
+            ruff check --output-format=github --select=E9,F63,F7,F82 --target-version=py311 .
+            # default set of ruff rules with GitHub Annotations
+            ruff check --output-format=github --ignore=E402,E501,E712,E731 --target-version=py311 .
+  
