@@ -89,7 +89,7 @@ jobs:
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${ { inputs.aws_role_arn } }
+          role-to-assume: ${{ inputs.aws_role_arn }}
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ inputs.aws_region }}
       - name: Install dependencies
