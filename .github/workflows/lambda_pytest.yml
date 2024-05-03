@@ -102,7 +102,7 @@ jobs:
           EXEC_ENV: "docker"
           # Have tried caching docker images but restoring the cache and loading the image is actually slower than just pulling from docker hub
         run: |
-          if [[ "${{ input.need_compose }}" == *"${{inputs.app_name}}"* ]]; then
+          if [[ "${{ inputs.need_compose }}" == *"${{inputs.app_name}}"* ]]; then
             docker compose -f ${{inputs.compose_path}}/docker-compose.yml up --detach --quiet-pull
           fi
           cd ${{inputs.tox_path}}
