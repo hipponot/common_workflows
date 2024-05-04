@@ -48,6 +48,10 @@ on:
       compose_path:
         description: "The path to the docker-compose file"
         type: string
+      aws_role_arn:
+        description: "The role to assume"
+        type: string
+        required: true
 
 # Permission can be added at job level or workflow level
 permissions:
