@@ -90,7 +90,6 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: "${{ inputs.aws_role_arn }}"
-          source-account: ${{ inputs.codeartifact_domain_owner }}
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ inputs.aws_region }}
       - name: Install dependencies
