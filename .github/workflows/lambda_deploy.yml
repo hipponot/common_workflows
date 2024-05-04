@@ -83,7 +83,7 @@ jobs:
         with:
           role-to-assume: "{ { inputs.aws_role_arn } }"
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ inputs.aws_region }}
       - name: Download workflow artifact
         uses: dawidd6/action-download-artifact@v2.28.0
         id: get_packaged
