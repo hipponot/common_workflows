@@ -10,9 +10,9 @@ on:
         default: |
           foo,bar,baz
     outputs:
-      app_matrix:
+      pattern_matrix:
         description: "List of apps to deploy"
-        value: ${{ jobs.check_for_changes.outputs.app_matrix }}
+        value: ${{ jobs.check_for_changes.outputs.pattern_matrix }}
 
 env:
   AWS_REGION: "us-west-2"
@@ -30,7 +30,7 @@ jobs:
       cancel-in-progress: true
     timeout-minutes: 5
     outputs:
-      app_matrix: ${{ steps.changes_in_app.outputs.app_matrix }}
+      pattern_matrix: ${{ steps.changes_in_app.outputs.pattern_matrix }}
     steps:
       - uses: actions/checkout@v4
         if: github.event_name != 'pull_request'
@@ -65,13 +65,13 @@ jobs:
         run: |
           pattern_list=${{ inputs.pattern_list }}
           IFS=', ' read -r -a app_array <<< "$pattern_list"
-          app_matrix=""
+          pattern_matrix=""
           for app in ${app_array[@]}; do
             if grep -q $app /tmp/changed_files.txt; then
-              app_matrix="$app_matrix,\"$app\""
+              pattern_matrix="$pattern_matrix,\"$app\""
               echo $(grep -q $app /tmp/changed_files.txt)
             fi
           done
-          app_matrix=$(echo $app_matrix | sed 's/^,//g')
-          echo app_matrix: [$app_matrix]
-          echo "app_matrix=[$app_matrix]" >> $GITHUB_OUTPUT
+          pattern_matrix=$(echo $pattern_matrix | sed 's/^,//g')
+          echo pattern_matrix: [$pattern_matrix]
+          echo "pattern_matrix=[$pattern_matrix]" >> $GITHUB_OUTPUT
