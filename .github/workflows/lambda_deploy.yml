@@ -85,7 +85,7 @@ jobs:
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
           aws-region: "${{ inputs.aws_region }}"
       - name: Download workflow artifact
-        uses: dawidd6/action-download-artifact@v2.28.0
+        uses: dawidd6/action-download-artifact@v3
         id: get_packaged
         with:
           name: sam_template_${{inputs.app_path}}_${{steps.file_hash.outputs.file_hash}}
