@@ -64,7 +64,7 @@ permissions:
 
 jobs:
   test:
-    uses: hipponot/common_workflows/.github/workflows/lambda_pytest.yml@copy_over
+    uses: ./.github/workflows/lambda_pytest.yml
     with:
       python_version: ${{ inputs.python_version }}
       app_path: ${{ inputs.app_path }}
@@ -101,7 +101,7 @@ jobs:
     needs:
       - test
       - set_enviroment
-    uses: hipponot/common_workflows/.github/workflows/lambda_deploy.yml@copy_over
+    uses: ./.github/workflows/lambda_deploy.yml
     with:
       environment: ${{ needs.set_enviroment.outputs.deploy_environment }}
       app_path: ${{ inputs.app_path }}
