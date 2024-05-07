@@ -105,5 +105,4 @@ jobs:
           if [[ "${{ inputs.need_compose }}" == *"${{inputs.app_name}}"* ]]; then
             docker compose -f ${{inputs.compose_path}}/docker-compose.yml up --detach --quiet-pull
           fi
-          cd ${{inputs.app_path}}/${{inputs.app_name}}
-          tox run -c ${{inputs.tox_path}}/tox.ini --root .
+          tox run -c ./${{inputs.tox_path}}/tox.ini --root ${{inputs.app_path}}/${{inputs.app_name}} --workdir ${{inputs.app_path}}/${{inputs.app_name}}
