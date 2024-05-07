@@ -48,6 +48,10 @@ on:
         description: "The bucket to store the artifacts"
         type: string
         required: true
+      pattern_list:
+        description: "The list of patterns to check for changes"
+        type: string
+        required: true
 
 jobs:
   lint:
@@ -69,7 +73,7 @@ jobs:
     needs: lint
     uses: hipponot/common_workflows/.github/workflows/check_for_changes.yml@copy_over
     with:
-      pattern_list: pull_chat_messages,transcription_post_processing,metadata_getter,notify_partner,retrieve_partner_data,reprocess_transcripts
+      pattern_list: ${{ inputs.pattern_list }}
 
   output_changed_apps:
     runs-on: ubuntu-latest
