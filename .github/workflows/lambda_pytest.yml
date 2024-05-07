@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   workflow_call:
     inputs:
-      python-version:
+      python_version:
         type: string
         required: true
         default: "3.11"
@@ -73,11 +73,11 @@ jobs:
             ${{inputs.app_path}}/${{inputs.app_name}}/
             ${{inputs.compose_path}}
 
-      - name: Set up Python ${{ inputs.python-version }}
+      - name: Set up Python ${{ inputs.python_version }}
         id: py_setup
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ inputs.python-version }}
+          python-version: ${{ inputs.python_version }}
       - name: pip cache
         id: cache-pip
         uses: actions/cache@v4
