@@ -8,12 +8,12 @@ on:
         type: string
         required: true
         default: "3.11"
-      app_name:
+      app_path:
         description: "The app to test"
         type: string
         required: true
-        default: "app_name"
-      app_path:
+        default: "app_path"
+      app_path_prefix:
         description: "The path to the app"
         type: string
         required: true
@@ -62,7 +62,7 @@ jobs:
   pytest:
     runs-on: ubuntu-latest
     concurrency:
-      group: "pytest ${{inputs.app_name}} - ${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
+      group: "pytest ${{inputs.app_path}} - ${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
       cancel-in-progress: true
     timeout-minutes: 5
     steps:
@@ -70,7 +70,7 @@ jobs:
         with:
           fetch-depth: 1
           sparse-checkout: |
-            ${{inputs.app_path}}/${{inputs.app_name}}/
+            ${{inputs.app_path_prefix}}/${{inputs.app_path}}/
             ${{inputs.compose_path}}
 
       - name: Set up Python ${{ inputs.python_version }}
@@ -97,12 +97,12 @@ jobs:
           CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain ${{inputs.codeartifact_domain}} --domain-owner ${{inputs.codeartifact_domain_owner}} --query authorizationToken --output text --duration-seconds 900`
           echo "aws_index_url=https://aws:$CODEARTIFACT_AUTH_TOKEN@${{inputs.codeartifact_domain}}-${{inputs.codeartifact_domain_owner}}.d.codeartifact.us-west-2.amazonaws.com/pypi/${{inputs.codeartifact_repository}}/simple/" >> $GITHUB_ENV
           pip install tox
-      - name: Test ${{inputs.app_name}} with pytest
+      - name: Test ${{inputs.app_path}} with pytest
         env:
           EXEC_ENV: "docker"
           # Have tried caching docker images but restoring the cache and loading the image is actually slower than just pulling from docker hub
         run: |
-          if [[ "${{ inputs.need_compose }}" == *"${{inputs.app_name}}"* ]]; then
+          if [[ "${{ inputs.need_compose }}" == *"${{inputs.app_path}}"* ]]; then
             docker compose -f ${{inputs.compose_path}}/docker-compose.yml up --detach --quiet-pull
           fi
-          tox run -c ./${{inputs.tox_path}}/tox.ini --root ${{inputs.app_path}}/${{inputs.app_name}} --workdir ${{inputs.app_path}}/${{inputs.app_name}}
+          tox run -c ./${{inputs.tox_path}}/tox.ini --root ${{inputs.app_path_prefix}}/${{inputs.app_path}} --workdir ${{inputs.app_path}}/${{inputs.app_path}}

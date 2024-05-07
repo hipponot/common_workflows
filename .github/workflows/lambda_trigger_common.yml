@@ -8,7 +8,7 @@ on:
         type: string
         required: true
         default: "3.11"
-      app_path:
+      app_path_prefix:
         description: "The path to the app"
         type: string
         required: true
@@ -91,12 +91,12 @@ jobs:
       actions: read
     strategy:
       matrix:
-        app_name: ${{fromJSON(needs.check_for_changes.outputs.app_matrix)}}
+        app_path: ${{fromJSON(needs.check_for_changes.outputs.app_matrix)}}
     with:
       python_version: ${{ inputs.python_version }}
-      app_name: ${{ matrix.app_name }}
+      app_path: ${{ matrix.app_path }}
       aws_region: ${{inputs.aws_region}}
-      app_path: ${{inputs.app_path}}
+      app_path_prefix: ${{inputs.app_path_prefix}}
       compose_path: ${{inputs.compose_path}}
       need_compose: ${{inputs.need_compose}}
       aws_role_arn: "${{inputs.aws_role_arn}}"
