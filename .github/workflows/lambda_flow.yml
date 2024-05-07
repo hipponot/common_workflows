@@ -8,11 +8,11 @@ on:
         type: string
         required: true
         default: "3.11"
-      app_name:
+      app_path:
         description: "The app to test"
         type: string
         required: true
-      app_path:
+      app_path_prefix:
         description: "The path to the app"
         type: string
         required: true
@@ -67,8 +67,8 @@ jobs:
     uses: hipponot/common_workflows/.github/workflows/lambda_pytest.yml@copy_over
     with:
       python_version: ${{ inputs.python_version }}
-      app_name: ${{ inputs.app_name }}
       app_path: ${{ inputs.app_path }}
+      app_path_prefix: ${{ inputs.app_path_prefix }}
       compose_path: ${{ inputs.compose_path }}
       need_compose: ${{ inputs.need_compose }}
       aws_role_arn: ${{ inputs.aws_role_arn }}
@@ -104,8 +104,8 @@ jobs:
     uses: hipponot/common_workflows/.github/workflows/lambda_deploy.yml@copy_over
     with:
       environment: ${{ needs.set_enviroment.outputs.deploy_environment }}
-      app_name: ${{ inputs.app_name }}
       app_path: ${{ inputs.app_path }}
+      app_path_prefix: ${{ inputs.app_path_prefix }}
       artifact_bucket: ${{ inputs.artifact_bucket }}
       compose_path: ${{ inputs.compose_path }}
       aws_role_arn: "${{ inputs.aws_role_arn }}"
