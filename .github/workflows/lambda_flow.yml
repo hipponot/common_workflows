@@ -108,7 +108,7 @@ jobs:
       app_path: ${{ inputs.app_path }}
       artifact_bucket: ${{ inputs.artifact_bucket }}
       compose_path: ${{ inputs.compose_path }}
-      aws_role_arn: ${{ inputs.aws_role_arn }}
+      aws_role_arn: "${{ inputs.aws_role_arn }}"
       codeartifact_domain: ${{ inputs.codeartifact_domain }}
       codeartifact_domain_owner: ${{ inputs.codeartifact_domain_owner }}
       codeartifact_repository: ${{ inputs.codeartifact_repository }}
