@@ -61,10 +61,10 @@ permissions:
 
 jobs:
   deploy:
-    environment: "${{inputs.app}}-${{ inputs.environment }}"
+    environment: "${{inputs.app_name}}-${{ inputs.environment }}"
     runs-on: ubuntu-latest
     concurrency:
-      group: "deploy ${{inputs.app}} - ${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
+      group: "deploy ${{inputs.app_name}} - ${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
       cancel-in-progress: true
     timeout-minutes: 10
     steps:
@@ -72,7 +72,7 @@ jobs:
         with:
           fetch-depth: 1
           sparse-checkout: |
-            ${{inputs.app_path}}/${{inputs.app}}/
+            ${{inputs.app_path}}/${{inputs.app_name}}/
       - name: get file hash
         id: file_hash
         run: |
@@ -88,8 +88,8 @@ jobs:
         uses: dawidd6/action-download-artifact@v2.28.0
         id: get_packaged
         with:
-          name: sam_template_${{inputs.app}}_${{ steps.file_hash.outputs.file_hash }}
-          path: ./${{inputs.app_path}}/${{inputs.app}}/
+          name: sam_template_${{inputs.app_name}}_${{ steps.file_hash.outputs.file_hash }}
+          path: ./${{inputs.app_path}}/${{inputs.app_name}}/
           workflow_conclusion: ""
           search_artifacts: true
         continue-on-error: true
@@ -105,7 +105,7 @@ jobs:
       - name: Sam build
         if: (steps.get_packaged.outcome!='success')
         run: |
-          cd ${{inputs.app_path}}/${{inputs.app}} && \
+          cd ${{inputs.app_path}}/${{inputs.app_name}} && \
             sam build \
               --use-container \
               --container-env-var PIP_INDEX_URL=$aws_index_url \
@@ -113,18 +113,18 @@ jobs:
       - name: Sam package
         if: (steps.get_packaged.outcome!='success')
         run: |
-          cd ${{inputs.app_path}}/${{inputs.app}} && \
+          cd ${{inputs.app_path}}/${{inputs.app_name}} && \
             sam package \
               --output-template-file packaged.yaml \
               --s3-bucket $ARTIFACT_BUCKET
       - uses: actions/upload-artifact@v3
         with:
-          name: sam_template_${{inputs.app}}_${{ steps.file_hash.outputs.file_hash }}
-          path: ./${{inputs.app_path}}/${{inputs.app}}/packaged.yaml
+          name: sam_template_${{inputs.app_name}}_${{ steps.file_hash.outputs.file_hash }}
+          path: ./${{inputs.app_path}}/${{inputs.app_name}}/packaged.yaml
 
       - name: Sam deploy to ${{ inputs.environment }}
         run: |
-          cd ./${{inputs.app_path}}/${{inputs.app}}
+          cd ./${{inputs.app_path}}/${{inputs.app_name}}
           array=("prod|qa")
           if [[ "|${array[*]}|" =~ "|${{ inputs.environment }}|" ]]; then
               config_env=${{ inputs.environment }}
@@ -146,7 +146,7 @@ jobs:
           python-version: "3.12"
       - name: Check deploy
         run: |
-          cd ./${{inputs.app_path}}/${{inputs.app}}
+          cd ./${{inputs.app_path}}/${{inputs.app_name}}
           if [ -f src/tests/ci_checks/test_deployed.py ]; then
             pip install pytest PyYAML
             DEPLOY_ENV=$config_env IS_CI=True pytest src/tests/ci_checks/test_deployed.py
