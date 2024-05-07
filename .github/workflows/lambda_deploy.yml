@@ -116,7 +116,7 @@ jobs:
           cd ${{inputs.app_path}}/${{inputs.app_name}} && \
             sam package \
               --output-template-file packaged.yaml \
-              --s3-bucket $ARTIFACT_BUCKET
+              --s3-bucket ${{inputs.artifact_bucket}} \
       - uses: actions/upload-artifact@v3
         with:
           name: sam_template_${{inputs.app_name}}_${{ steps.file_hash.outputs.file_hash }}
