@@ -4,19 +4,19 @@ default_language_version:
 
 repos:
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.2.5
+    rev: v2.2.6
     hooks:
       - id: codespell
         args: [-L, alog]
         exclude: "compare_results.py"
 
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.17.0
+    rev: v8.18.2
     hooks:
       - id: gitleaks
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.6.0
     hooks:
       - id: check-added-large-files
       - id: check-ast

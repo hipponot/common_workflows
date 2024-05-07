@@ -1,0 +1,108 @@
+name: lambda_pytest
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      python_version:
+        type: string
+        required: true
+        default: "3.11"
+      app_path:
+        description: "The app to test"
+        type: string
+        required: true
+        default: "app_path"
+      app_path_prefix:
+        description: "The path to the app"
+        type: string
+        required: true
+      compose_path:
+        description: "The path to the docker-compose file"
+        type: string
+      need_compose:
+        description: "List of apps that need docker-compose"
+        type: string
+      aws_role_arn:
+        description: "The role to assume"
+        type: string
+        required: true
+      codeartifact_domain:
+        description: "The codeartifact domain"
+        type: string
+        required: true
+        default: "domain_name"
+      codeartifact_domain_owner:
+        description: "The codeartifact domain owner"
+        type: string
+        required: true
+        default: "123456789012"
+      codeartifact_repository:
+        description: "The codeartifact repository"
+        type: string
+        required: true
+        default: "repository_name"
+      tox_path:
+        description: "The path to the tox file"
+        type: string
+        required: true
+        default: "/tox/path"
+      aws_region:
+        description: "The region to deploy to"
+        type: string
+        required: true
+        default: "us-west-2"
+
+# Permission can be added at job level or workflow level
+permissions:
+  id-token: write # This is required for requesting the JWT
+  contents: read # This is required for actions/checkout
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: "pytest ${{inputs.app_path}} - ${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
+      cancel-in-progress: true
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          sparse-checkout: |
+            ${{inputs.app_path_prefix}}/${{inputs.app_path}}/
+            ${{inputs.compose_path}}
+
+      - name: Set up Python ${{ inputs.python_version }}
+        id: py_setup
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python_version }}
+      - name: pip cache
+        id: cache-pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: "${{ inputs.aws_role_arn }}"
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ inputs.aws_region }}
+      - name: Install dependencies
+        run: |
+          CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain ${{inputs.codeartifact_domain}} --domain-owner ${{inputs.codeartifact_domain_owner}} --query authorizationToken --output text --duration-seconds 900`
+          echo "aws_index_url=https://aws:$CODEARTIFACT_AUTH_TOKEN@${{inputs.codeartifact_domain}}-${{inputs.codeartifact_domain_owner}}.d.codeartifact.us-west-2.amazonaws.com/pypi/${{inputs.codeartifact_repository}}/simple/" >> $GITHUB_ENV
+          pip install tox
+      - name: Test ${{inputs.app_path}} with pytest
+        env:
+          EXEC_ENV: "docker"
+          # Have tried caching docker images but restoring the cache and loading the image is actually slower than just pulling from docker hub
+        run: |
+          if [[ "${{ inputs.need_compose }}" == *"${{inputs.app_path}}"* ]]; then
+            docker compose -f ${{inputs.compose_path}}/docker-compose.yml up --detach --quiet-pull
+          fi
+          tox run -c ./${{inputs.tox_path}}/tox.ini --root ${{inputs.app_path_prefix}}/${{inputs.app_path}} --workdir ${{inputs.app_path}}/${{inputs.app_path}}

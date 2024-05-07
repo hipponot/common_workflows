@@ -1,0 +1,107 @@
+name: lambda_trigger
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      python_version:
+        type: string
+        required: true
+        default: "3.11"
+      app_path_prefix:
+        description: "The path to the app"
+        type: string
+        required: true
+      compose_path:
+        description: "The path to the docker-compose files"
+        type: string
+        required: true
+      need_compose:
+        description: "The services that need to be started"
+        type: string
+        required: true
+      aws_role_arn:
+        description: "The role to assume"
+        type: string
+        required: true
+      codeartifact_domain:
+        description: "The codeartifact domain"
+        type: string
+        required: true
+      codeartifact_domain_owner:
+        description: "The codeartifact domain owner"
+        type: string
+        required: true
+      codeartifact_repository:
+        description: "The codeartifact repository"
+        type: string
+        required: true
+      tox_path:
+        description: "The path to the tox files"
+        type: string
+        required: true
+      aws_region:
+        description: "The region to use"
+        type: string
+        required: true
+      artifact_bucket:
+        description: "The bucket to store the artifacts"
+        type: string
+        required: true
+      pattern_list:
+        description: "The list of patterns to check for changes"
+        type: string
+        required: true
+
+jobs:
+  lint:
+    concurrency:
+      group: "pylint ${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
+      cancel-in-progress: true
+    if: github.event.action != 'closed' && github.event.action != 'deleted'
+    uses: ./.github/workflows/python_lint.yml
+    with:
+      python_version: ${{ inputs.python_version }}
+
+  check_for_changes:
+    permissions:
+      id-token: write
+      contents: read
+    concurrency:
+      group: "check_for_changes ${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
+      cancel-in-progress: true
+    needs: lint
+    uses: ./.github/workflows/check_for_changes.yml
+    with:
+      pattern_list: ${{ inputs.pattern_list }}
+
+  output_changed_apps:
+    runs-on: ubuntu-latest
+    needs: check_for_changes
+    steps:
+      - run: echo ${{needs.check_for_changes.outputs.app_matrix}}
+
+  lambda_flow:
+    if: (needs.check_for_changes.outputs.app_matrix != '[]')
+    needs: check_for_changes
+    uses: ./.github/workflows/lambda_flow.yml
+    permissions:
+      id-token: write
+      contents: read
+      actions: read
+    strategy:
+      matrix:
+        app_path: ${{fromJSON(needs.check_for_changes.outputs.app_matrix)}}
+    with:
+      python_version: ${{ inputs.python_version }}
+      app_path: ${{ matrix.app_path }}
+      aws_region: ${{inputs.aws_region}}
+      app_path_prefix: ${{inputs.app_path_prefix}}
+      compose_path: ${{inputs.compose_path}}
+      need_compose: ${{inputs.need_compose}}
+      aws_role_arn: "${{inputs.aws_role_arn}}"
+      codeartifact_domain: ${{inputs.codeartifact_domain}}
+      codeartifact_domain_owner: ${{inputs.codeartifact_domain_owner}}
+      codeartifact_repository: ${{inputs.codeartifact_repository}}
+      tox_path: ${{inputs.tox_path}}
+      artifact_bucket: ${{inputs.artifact_bucket}}
