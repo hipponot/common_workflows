@@ -118,6 +118,7 @@ jobs:
               --output-template-file packaged.yaml \
               --s3-bucket ${{inputs.artifact_bucket}} \
       - uses: actions/upload-artifact@v3
+        if: (steps.get_packaged.outcome!='success')
         with:
           name: sam_template_${{inputs.app_name}}_${{steps.file_hash.outputs.file_hash}}
           path: ${{inputs.app_path}}/${{inputs.app_name}}/packaged.yaml
