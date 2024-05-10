@@ -88,7 +88,7 @@ jobs:
         uses: dawidd6/action-download-artifact@v3.1.4
         id: get_packaged
         with:
-          name: sam_template_${{inputs.app_path}}_${{steps.file_hash.outputs.file_hash}}
+          name: sam_template_${{steps.file_hash.outputs.file_hash}}
           path: ${{inputs.app_path_prefix}}/${{inputs.app_path}}/
           workflow_conclusion: ""
           search_artifacts: true
@@ -120,7 +120,7 @@ jobs:
       - uses: actions/upload-artifact@v4.3.3
         if: (steps.get_packaged.outcome!='success')
         with:
-          name: sam_template_${{inputs.app_path}}_${{steps.file_hash.outputs.file_hash}}
+          name: sam_template_${{steps.file_hash.outputs.file_hash}}
           path: ${{inputs.app_path_prefix}}/${{inputs.app_path}}/packaged.yaml
 
       - name: Sam deploy to ${{ inputs.environment }}
