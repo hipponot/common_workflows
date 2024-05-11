@@ -97,6 +97,13 @@ jobs:
           CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain ${{inputs.codeartifact_domain}} --domain-owner ${{inputs.codeartifact_domain_owner}} --query authorizationToken --output text --duration-seconds 900`
           echo "aws_index_url=https://aws:$CODEARTIFACT_AUTH_TOKEN@${{inputs.codeartifact_domain}}-${{inputs.codeartifact_domain_owner}}.d.codeartifact.us-west-2.amazonaws.com/pypi/${{inputs.codeartifact_repository}}/simple/" >> $GITHUB_ENV
           pip install tox
+      - name: Put aws variables in config file
+        run: |
+          echo "[default]" > ~/.aws/config
+          echo "region = ${{inputs.aws_region}}" >> ~/.aws/config
+          echo "[default]" > ~/.aws/credentials
+          echo "aws_access_key_id = ${{secrets.AWS_ACCESS_KEY_ID}}" >> ~/.aws/credentials
+          echo "aws_secret_access_key = ${{secrets.AWS_SECRET_ACCESS_KEY}}" >> ~/.aws/credentials
       - name: Test ${{inputs.app_path}} with pytest
         env:
           EXEC_ENV: "docker"
