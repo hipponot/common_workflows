@@ -99,6 +99,7 @@ jobs:
           pip install tox
       - name: Put aws variables in config file
         run: |
+          mkdir -p ~/.aws
           echo "[default]" > ~/.aws/config
           echo "region = ${{inputs.aws_region}}" >> ~/.aws/config
           echo "[default]" > ~/.aws/credentials
