@@ -9,6 +9,10 @@ on:
         type: string
         default: |
           foo,bar,baz
+      default_branch:
+        description: "Default branch"
+        type: string
+        default: main
     outputs:
       pattern_matrix:
         description: "List of apps to deploy"
@@ -35,12 +39,12 @@ jobs:
       - uses: actions/checkout@v4
         if: github.event_name != 'pull_request'
         with:
-          ref: main
+          ref: ${{ github.event.inputs.default_branch }}
           fetch-depth: 2
       - uses: actions/checkout@v4
         if: github.event_name == 'pull_request'
         with:
-          ref: main
+          ref: ${{ github.event.inputs.default_branch }}
           fetch-depth: 0
       - uses: actions/checkout@v4
         if: github.event_name != 'pull_request'
@@ -54,8 +58,8 @@ jobs:
         id: get_diff_files
         run: |
           if [ ${{ github.event_name }} == "pull_request" ]; then
-            git diff --name-only origin/main ${{ github.sha }} > /tmp/changed_files.txt
-            echo "Diff between origin/main and ${{ github.sha }}"
+            git diff --name-only origin/${{ github.event.inputs.default_branch }} ${{ github.sha }} > /tmp/changed_files.txt
+            echo "Diff between origin/${{ github.event.inputs.default_branch }} and ${{ github.sha }}"
           else
             git diff --name-only ${{ github.event.before }} ${{ github.sha }} > /tmp/changed_files.txt
             echo "Diff between ${{ github.event.before }} and ${{ github.sha }}"
