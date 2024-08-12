@@ -41,19 +41,23 @@ jobs:
         with:
           ref: ${{ github.event.inputs.default_branch }}
           fetch-depth: 2
+          submodules: 'false'
       - uses: actions/checkout@v4
         if: github.event_name == 'pull_request'
         with:
           ref: ${{ github.event.inputs.default_branch }}
           fetch-depth: 0
+          submodules: 'false'
       - uses: actions/checkout@v4
         if: github.event_name != 'pull_request'
         with:
           fetch-depth: 2
+          submodules: 'false'
       - uses: actions/checkout@v4
         if: github.event_name == 'pull_request'
         with:
           fetch-depth: 1
+          submodules: 'false'
       - name: Gather files changed
         id: get_diff_files
         run: |
