@@ -45,25 +45,21 @@ jobs:
         with:
           ref: ${{ inputs.default_branch }}
           fetch-depth: 2
-          submodules: 'false'
           sparse-checkout:  ${{ inputs.sparse_checkout_dir }}
       - uses: actions/checkout@v4
         if: github.event_name == 'pull_request'
         with:
           ref: ${{ inputs.default_branch }}
           fetch-depth: 0
-          submodules: 'false'
       - uses: actions/checkout@v4
         if: github.event_name != 'pull_request'
         with:
           fetch-depth: 2
-          submodules: 'false'
           clean: false
       - uses: actions/checkout@v4
         if: github.event_name == 'pull_request'
         with:
           fetch-depth: 1
-          submodules: 'false'
           clean: false
       - name: Gather files changed
         id: get_diff_files
