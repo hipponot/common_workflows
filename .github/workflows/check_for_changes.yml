@@ -13,6 +13,10 @@ on:
         description: "Default branch"
         type: string
         default: main
+      sparse_checkout_dir:
+        description: "Sparse checkout directory"
+        type: string
+        default: "apps"
     outputs:
       pattern_matrix:
         description: "List of apps to deploy"
@@ -42,6 +46,7 @@ jobs:
           ref: ${{ inputs.default_branch }}
           fetch-depth: 2
           submodules: 'false'
+          sparse-checkout:  ${{ inputs.sparse_checkout_dir }}
       - uses: actions/checkout@v4
         if: github.event_name == 'pull_request'
         with:
@@ -53,11 +58,13 @@ jobs:
         with:
           fetch-depth: 2
           submodules: 'false'
+          clean: false
       - uses: actions/checkout@v4
         if: github.event_name == 'pull_request'
         with:
           fetch-depth: 1
           submodules: 'false'
+          clean: false
       - name: Gather files changed
         id: get_diff_files
         run: |
