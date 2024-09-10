@@ -147,11 +147,8 @@ jobs:
           python-version: "3.12"
       - name: Check deploy
         run: |
-
-          AWS_INDEX_URL=
-
           cd ./${{inputs.app_path_prefix}}/${{inputs.app_path}}
           if [ -f src/tests/ci_checks/test_deployed.py ]; then
-            pip install pytest PyYAML saga_py_test_helpers -i $AWS_INDEX_URL
+            pip install pytest PyYAML saga_py_test_helpers -i $aws_index_url
             DEPLOY_ENV=$config_env IS_CI=True pytest src/tests/ci_checks/test_deployed.py
           fi
