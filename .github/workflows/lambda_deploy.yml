@@ -88,16 +88,16 @@ jobs:
         uses: dawidd6/action-download-artifact@v3.1.4
         id: get_packaged
         with:
-          name: sam_template_${{inputs.app_path}}_${{steps.file_hash.outputs.file_hash}}
+          name: sam_template_${{steps.file_hash.outputs.file_hash}}
           path: ${{inputs.app_path_prefix}}/${{inputs.app_path}}/
           workflow_conclusion: ""
           search_artifacts: true
         continue-on-error: true
       - name: Setup for dependencies
-        if: (steps.get_packaged.outcome!='success')
+        # need to set the aws index url for building but also testing
         run: |
           CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain ${{inputs.codeartifact_domain}} --domain-owner ${{inputs.codeartifact_domain_owner}} --query authorizationToken --output text --duration-seconds 900`
-          echo "aws_index_url=https://aws:$CODEARTIFACT_AUTH_TOKEN@${{inputs.codeartifact_domain}}-${{inputs.codeartifact_domain_owner}}.d.codeartifact.us-west-2.amazonaws.com/pypi/${{inputs.codeartifact_repository}}/simple/" >> $GITHUB_ENV
+          echo "AWS_INDEX_URL=https://aws:$CODEARTIFACT_AUTH_TOKEN@${{inputs.codeartifact_domain}}-${{inputs.codeartifact_domain_owner}}.d.codeartifact.us-west-2.amazonaws.com/pypi/${{inputs.codeartifact_repository}}/simple/" >> $GITHUB_ENV
 
       - uses: aws-actions/setup-sam@v2
         with:
@@ -108,7 +108,7 @@ jobs:
           cd ${{inputs.app_path_prefix}}/${{inputs.app_path}} && \
             sam build \
               --use-container \
-              --container-env-var PIP_INDEX_URL=$aws_index_url \
+              --container-env-var PIP_INDEX_URL=$AWS_INDEX_URL \
               --parallel
       - name: Sam package
         if: (steps.get_packaged.outcome!='success')
@@ -120,7 +120,7 @@ jobs:
       - uses: actions/upload-artifact@v4.3.3
         if: (steps.get_packaged.outcome!='success')
         with:
-          name: sam_template_${{inputs.app_path}}_${{steps.file_hash.outputs.file_hash}}
+          name: sam_template_${{steps.file_hash.outputs.file_hash}}
           path: ${{inputs.app_path_prefix}}/${{inputs.app_path}}/packaged.yaml
 
       - name: Sam deploy to ${{ inputs.environment }}
@@ -149,6 +149,6 @@ jobs:
         run: |
           cd ./${{inputs.app_path_prefix}}/${{inputs.app_path}}
           if [ -f src/tests/ci_checks/test_deployed.py ]; then
-            pip install pytest PyYAML
+            pip install pytest PyYAML saga_py_test_helpers -i $AWS_INDEX_URL
             DEPLOY_ENV=$config_env IS_CI=True pytest src/tests/ci_checks/test_deployed.py
           fi

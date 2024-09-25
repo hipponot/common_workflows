@@ -95,7 +95,7 @@ jobs:
       - name: Install dependencies
         run: |
           CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain ${{inputs.codeartifact_domain}} --domain-owner ${{inputs.codeartifact_domain_owner}} --query authorizationToken --output text --duration-seconds 900`
-          echo "aws_index_url=https://aws:$CODEARTIFACT_AUTH_TOKEN@${{inputs.codeartifact_domain}}-${{inputs.codeartifact_domain_owner}}.d.codeartifact.us-west-2.amazonaws.com/pypi/${{inputs.codeartifact_repository}}/simple/" >> $GITHUB_ENV
+          echo "AWS_INDEX_URL=https://aws:$CODEARTIFACT_AUTH_TOKEN@${{inputs.codeartifact_domain}}-${{inputs.codeartifact_domain_owner}}.d.codeartifact.us-west-2.amazonaws.com/pypi/${{inputs.codeartifact_repository}}/simple/" >> $GITHUB_ENV
           pip install tox
       - name: Test ${{inputs.app_path}} with pytest
         env:
@@ -105,4 +105,4 @@ jobs:
           if [[ "${{ inputs.need_compose }}" == *"${{inputs.app_path}}"* ]]; then
             docker compose -f ${{inputs.compose_path}}/docker-compose.yml up --detach --quiet-pull
           fi
-          tox run -c ./${{inputs.tox_path}}/tox.ini --root ${{inputs.app_path_prefix}}/${{inputs.app_path}} --workdir ${{inputs.app_path}}/${{inputs.app_path}}
+          tox run -c ./${{inputs.tox_path}}/tox.ini --root ${{inputs.app_path_prefix}}/${{inputs.app_path}} --workdir ${{inputs.app_path_prefix}}/${{inputs.app_path}}
