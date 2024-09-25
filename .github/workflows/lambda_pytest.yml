@@ -95,17 +95,8 @@ jobs:
       - name: Install dependencies
         run: |
           CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain ${{inputs.codeartifact_domain}} --domain-owner ${{inputs.codeartifact_domain_owner}} --query authorizationToken --output text --duration-seconds 900`
-          echo "aws_index_url=https://aws:$CODEARTIFACT_AUTH_TOKEN@${{inputs.codeartifact_domain}}-${{inputs.codeartifact_domain_owner}}.d.codeartifact.us-west-2.amazonaws.com/pypi/${{inputs.codeartifact_repository}}/simple/" >> $GITHUB_ENV
+          echo "AWS_INDEX_URL=https://aws:$CODEARTIFACT_AUTH_TOKEN@${{inputs.codeartifact_domain}}-${{inputs.codeartifact_domain_owner}}.d.codeartifact.us-west-2.amazonaws.com/pypi/${{inputs.codeartifact_repository}}/simple/" >> $GITHUB_ENV
           pip install tox
-      - name: Put aws variables in config file
-        run: |
-          mkdir -p ~/.aws
-          echo "[default]" > ~/.aws/config
-          echo "region = ${{inputs.aws_region}}" >> ~/.aws/config
-          echo "[default]" > ~/.aws/credentials
-          echo "aws_access_key_id = $AWS_ACCESS_KEY_ID" >> ~/.aws/credentials
-          echo "aws_secret_access_key = $AWS_SECRET_ACCESS_KEY" >> ~/.aws/credentials
-          echo "aws_session_token = $AWS_SESSION_TOKEN" >> ~/.aws/credentials
       - name: Test ${{inputs.app_path}} with pytest
         env:
           EXEC_ENV: "docker"
