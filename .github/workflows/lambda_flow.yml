@@ -78,32 +78,46 @@ jobs:
       tox_path: ${{ inputs.tox_path }}
       aws_region: ${{ inputs.aws_region }}
 
-  set_enviroment:
+  set_environment:
     runs-on: ubuntu-latest
     outputs:
-      deploy_environment: ${{ steps.set_enviroment.outputs.deploy_environment }}
+      deploy_environment: ${{ steps.set_environment.outputs.deploy_environment }}
     steps:
       - name: Set environment variable
-        id: set_enviroment
+        id: set_environment
         run: |
           if [ "${{ github.event_name }}" != "pull_request" ]; then
-            if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-              deploy_environment=prod
-            else
-              deploy_environment=tmp
-            fi
-          elif  [ "${{ github.event_name }}" == "pull_request" ]; then
             deploy_environment=qa
+          elif  [ "${{ github.event_name }}" == "pull_request" ]; then
+            deploy_environment=default
           fi
           echo "deploy_environment:$deploy_environment"
           echo "deploy_environment=$deploy_environment" >> $GITHUB_OUTPUT
   deploy:
     needs:
       - test
-      - set_enviroment
+      - set_environment
     uses: ./.github/workflows/lambda_deploy.yml
     with:
-      environment: ${{ needs.set_enviroment.outputs.deploy_environment }}
+      environment: ${{ needs.set_environment.outputs.deploy_environment }}
+      app_path: ${{ inputs.app_path }}
+      app_path_prefix: ${{ inputs.app_path_prefix }}
+      artifact_bucket: ${{ inputs.artifact_bucket }}
+      compose_path: ${{ inputs.compose_path }}
+      aws_role_arn: "${{ inputs.aws_role_arn }}"
+      codeartifact_domain: ${{ inputs.codeartifact_domain }}
+      codeartifact_domain_owner: ${{ inputs.codeartifact_domain_owner }}
+      codeartifact_repository: ${{ inputs.codeartifact_repository }}
+      tox_path: ${{ inputs.tox_path }}
+      aws_region: ${{ inputs.aws_region }}
+
+  deploy_prod:
+    if: (github.event_name != "pull_request") && (github.ref == "refs/heads/main")
+    needs:
+      - deploy
+    uses: ./.github/workflows/lambda_deploy.yml
+    with:
+      environment: prod
       app_path: ${{ inputs.app_path }}
       app_path_prefix: ${{ inputs.app_path_prefix }}
       artifact_bucket: ${{ inputs.artifact_bucket }}
