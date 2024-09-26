@@ -112,7 +112,7 @@ jobs:
       aws_region: ${{ inputs.aws_region }}
 
   deploy_prod:
-    if: ${{ github.event_name != 'pull_request' }} && ${{ github.ref == 'refs/heads/main' }}
+    if: ${{ github.event_name == 'push' }} && ${{ github.ref == 'refs/heads/main' }}
     needs:
       - deploy
     uses: ./.github/workflows/lambda_deploy.yml
