@@ -87,15 +87,16 @@ jobs:
         id: set_environment
         run: |
           if [ "${{ github.event_name }}" == "pull_request" ]; then
-            # If the PR is a draft, deploy to the default environment, otherwise deploy to the qa environment
-            if [ ${{ github.event.pull_request.draft }} = true ]; then
-              deploy_environment=default
-            else
-              deploy_environment=qa
-            fi
+
+          # If the PR is a draft, deploy to the default environment, otherwise deploy to the qa environment
+          if [ ${{ github.event.pull_request.draft }} = true ]; then
+          deploy_environment=default
+          else
+          deploy_environment=qa
+          fi
+          elif [ "${{ github.event_name }}" == "push" ]; then
           # If the PR is merged, deploy to the prod environment
-          elif  [ "${{ github.event_name }}" != "pull_request"  ]; then
-            deploy_environment=prod
+              deploy_environment=prod
           fi
           echo "deploy_environment:$deploy_environment"
           echo "deploy_environment=$deploy_environment" >> $GITHUB_OUTPUT
