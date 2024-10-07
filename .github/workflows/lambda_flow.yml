@@ -88,13 +88,13 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" == "pull_request" ]; then
             # If the PR is a draft, deploy to the default environment, otherwise deploy to the qa environment
-            if [ ${{ github.event.pull_request.draft }} ]; then
+            if [ ${{ github.event.pull_request.draft }} = true ]; then
               deploy_environment=default
             else
               deploy_environment=qa
             fi
           # If the PR is merged, deploy to the prod environment
-          elif  [ ${{ github.ref == 'refs/heads/main' && github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true }} ]; then
+          elif  [ ${{ github.ref == 'refs/heads/main' && github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true }} = true ]; then
             deploy_environment=prod
           fi
           echo "deploy_environment:$deploy_environment"
