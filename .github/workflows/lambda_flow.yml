@@ -86,10 +86,14 @@ jobs:
       - name: Set environment variable
         id: set_environment
         run: |
-          if [ "${{ github.event_name }}" != "pull_request" ]; then
-            deploy_environment=qa
-          elif  [ "${{ github.event_name }}" == "pull_request" ]; then
-            deploy_environment=default
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            if [ "${{ github.event.pull_request.draft }}" ]; then
+              deploy_environment=default
+            else
+              deploy_environment=qa
+            fi
+          elif  [ ${{ github.ref == 'refs/heads/main' && github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true }} ]; then
+            deploy_environment=prod
           fi
           echo "deploy_environment:$deploy_environment"
           echo "deploy_environment=$deploy_environment" >> $GITHUB_OUTPUT
@@ -100,25 +104,6 @@ jobs:
     uses: ./.github/workflows/lambda_deploy.yml
     with:
       environment: ${{ needs.set_environment.outputs.deploy_environment }}
-      app_path: ${{ inputs.app_path }}
-      app_path_prefix: ${{ inputs.app_path_prefix }}
-      artifact_bucket: ${{ inputs.artifact_bucket }}
-      compose_path: ${{ inputs.compose_path }}
-      aws_role_arn: "${{ inputs.aws_role_arn }}"
-      codeartifact_domain: ${{ inputs.codeartifact_domain }}
-      codeartifact_domain_owner: ${{ inputs.codeartifact_domain_owner }}
-      codeartifact_repository: ${{ inputs.codeartifact_repository }}
-      tox_path: ${{ inputs.tox_path }}
-      aws_region: ${{ inputs.aws_region }}
-
-  deploy_prod:
-    # if merge into main branch, deploy to prod
-    if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true }}
-    needs:
-      - deploy
-    uses: ./.github/workflows/lambda_deploy.yml
-    with:
-      environment: prod
       app_path: ${{ inputs.app_path }}
       app_path_prefix: ${{ inputs.app_path_prefix }}
       artifact_bucket: ${{ inputs.artifact_bucket }}
