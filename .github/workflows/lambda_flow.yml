@@ -94,7 +94,7 @@ jobs:
               deploy_environment=qa
             fi
           # If the PR is merged, deploy to the prod environment
-          elif  [ ${{ github.ref == 'refs/heads/main' && github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true }} = true ]; then
+          elif  [ "${{ github.event_name }}" != "pull_request"  ]; then
             deploy_environment=prod
           fi
           echo "deploy_environment:$deploy_environment"
