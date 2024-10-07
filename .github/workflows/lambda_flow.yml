@@ -96,7 +96,7 @@ jobs:
             else
               deploy_environment=qa
             fi
-          else 
+          else
             deploy_environment=default
           fi
           echo "deploy_environment:$deploy_environment"
