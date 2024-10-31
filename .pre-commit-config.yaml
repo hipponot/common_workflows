@@ -4,19 +4,19 @@ default_language_version:
 
 repos:
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.2.6
+    rev: v2.3.0
     hooks:
       - id: codespell
         args: [-L, alog]
         exclude: "compare_results.py"
 
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.18.2
+    rev: v8.21.2
     hooks:
       - id: gitleaks
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
       - id: check-added-large-files
       - id: check-ast
@@ -34,7 +34,7 @@ repos:
       - id: requirements-txt-fixer
       - id: trailing-whitespace
 
-  # - repo: https://github.com/hipponot/common_workflows.git
-  #   rev: v0.0.2
-  #   hooks:
-  #     - id: commit_msg_issue_number_prepend
+  - repo: https://github.com/hipponot/common_workflows.git
+    rev: v0.0.3
+    hooks:
+      - id: issue_number_prepend
