@@ -16,6 +16,9 @@ fi
 if [ "$REPO_NAME" = "ms" ]; then
     REPO_PREPEND="hipponot/microservices"
 fi
+if [ "$REPO_NAME" = "iac" ]; then
+    REPO_PREPEND="hipponot/iac"
+fi
 if [ "$REPO_NAME" = "scs" ]; then
     REPO_PREPEND="saga-ed/saga-cu-shared"
 fi
