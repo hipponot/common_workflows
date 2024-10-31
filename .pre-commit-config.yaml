@@ -33,3 +33,8 @@ repos:
       - id: fix-encoding-pragma
       - id: requirements-txt-fixer
       - id: trailing-whitespace
+
+  # - repo: https://github.com/hipponot/common_workflows.git
+  #   rev: v0.1.0
+  #   hooks:
+  #     - id: commit_msg_issue_number_prepend
