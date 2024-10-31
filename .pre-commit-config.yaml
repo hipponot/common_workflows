@@ -35,6 +35,6 @@ repos:
       - id: trailing-whitespace
 
   # - repo: https://github.com/hipponot/common_workflows.git
-  #   rev: v0.0.1
+  #   rev: v0.0.2
   #   hooks:
   #     - id: commit_msg_issue_number_prepend

@@ -1,7 +1,7 @@
 - id: issue_number_prepend
   name: issue_number_prepend
   description: "Prepend issue number to commit message"
-  entry: commit_msg_issue_number_prepend.sh
+  entry: ./commit_msg_issue_number_prepend.sh
   language: script
   args: []
   require_serial: true
