@@ -97,11 +97,15 @@ jobs:
           CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain ${{inputs.codeartifact_domain}} --domain-owner ${{inputs.codeartifact_domain_owner}} --query authorizationToken --output text --duration-seconds 900`
           echo "AWS_INDEX_URL=https://aws:$CODEARTIFACT_AUTH_TOKEN@${{inputs.codeartifact_domain}}-${{inputs.codeartifact_domain_owner}}.d.codeartifact.us-west-2.amazonaws.com/pypi/${{inputs.codeartifact_repository}}/simple/" >> $GITHUB_ENV
           pip install tox
+      - name: Debug AWS credentials
+        run: |
+          echo "AWS Access Key ID length: ${#AWS_ACCESS_KEY_ID}"
+          echo "AWS Secret Access Key length: ${#AWS_SECRET_ACCESS_KEY}"
+          echo "AWS Session Token length: ${#AWS_SESSION_TOKEN}"
+          aws sts get-caller-identity
       - name: Test ${{inputs.app_path}} with pytest
         env:
           EXEC_ENV: "docker"
-          # Have tried caching docker images but restoring the cache and loading the image is actually slower than just pulling from docker hub
-          # Add these environment variables to pass AWS credentials to tox/pytest
           AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
           AWS_SESSION_TOKEN: ${{ env.AWS_SESSION_TOKEN }}
