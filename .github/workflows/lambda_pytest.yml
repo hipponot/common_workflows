@@ -97,27 +97,6 @@ jobs:
           CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain ${{inputs.codeartifact_domain}} --domain-owner ${{inputs.codeartifact_domain_owner}} --query authorizationToken --output text --duration-seconds 900`
           echo "AWS_INDEX_URL=https://aws:$CODEARTIFACT_AUTH_TOKEN@${{inputs.codeartifact_domain}}-${{inputs.codeartifact_domain_owner}}.d.codeartifact.us-west-2.amazonaws.com/pypi/${{inputs.codeartifact_repository}}/simple/" >> $GITHUB_ENV
           pip install tox
-      - name: Debug AWS credentials
-        run: |
-          echo "AWS Access Key ID length: ${#AWS_ACCESS_KEY_ID}"
-          echo "AWS Secret Access Key length: ${#AWS_SECRET_ACCESS_KEY}"
-          echo "AWS Session Token length: ${#AWS_SESSION_TOKEN}"
-          aws sts get-caller-identity
-      - name: Debug AWS credentials more
-        env:
-          AWS_ACCESS_KEY_ID_secrets: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY_secrets: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_SESSION_TOKEN_secrets: ${{ secrets.AWS_SESSION_TOKEN }}
-          AWS_ACCESS_KEY_ID_env: ${{ env.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY_env: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          AWS_SESSION_TOKEN_env: ${{ env.AWS_SESSION_TOKEN }}
-        run: |
-          echo "AWS Access Key ID length from secrets: ${#AWS_ACCESS_KEY_ID_secrets}"
-          echo "AWS Secret Access Key length from secrets: ${#AWS_SECRET_ACCESS_KEY_secrets}"
-          echo "AWS Session Token length from secrets: ${#AWS_SESSION_TOKEN_secrets}"
-          echo "AWS Access Key ID length from env: ${#AWS_ACCESS_KEY_ID_env}"
-          echo "AWS Secret Access Key length from env: ${#AWS_SECRET_ACCESS_KEY_env}"
-          echo "AWS Session Token length from env: ${#AWS_SESSION_TOKEN_env}"
       - name: Test ${{inputs.app_path}} with pytest
         env:
           EXEC_ENV: "docker"
