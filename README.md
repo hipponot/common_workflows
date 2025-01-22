@@ -19,5 +19,5 @@ to add version
 
 ```shell
 git tag <version>
-git push <version>
+git push origin tag <version>
 ```
