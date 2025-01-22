@@ -25,6 +25,7 @@ for SETTING in $SETTINGS ; do
       git reset "$SETTING"
    fi
 done
+exit 0
 )
 
 exec git diff-index --check --cached $against --
