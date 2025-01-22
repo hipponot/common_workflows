@@ -4,6 +4,17 @@ on:
   workflow_dispatch:
   push:
   workflow_call:
+    inputs:
+      files:
+        type: string
+        description: "Files to run pre-commit on"
+        required: false
+        default: ""
+      exclude:
+        type: string
+        description: "Files to exclude from pre-commit"
+        required: false
+        default: "^$"
 
 jobs:
   pre-commit:
@@ -16,7 +27,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.11
+          python-version: 3.12
       - name: set PY
         run: echo "PY=$(python -VV | sha256sum | cut -d' ' -f1)" >> $GITHUB_ENV
       - uses: actions/cache@v4
@@ -24,3 +35,6 @@ jobs:
           path: ~/.cache/pre-commit
           key: pre-commit|${{ env.PY }}|${{ hashFiles('.pre-commit-config.yaml') }}
       - uses: pre-commit/action@v3.0.1
+        with:
+          files: ${{ inputs.files }}
+          exclude: ${{ inputs.exclude }}
