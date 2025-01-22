@@ -36,5 +36,5 @@ jobs:
           key: pre-commit|${{ env.PY }}|${{ hashFiles('.pre-commit-config.yaml') }}
       - uses: pre-commit/action@v3.0.1
         with:
-          files: ${{ github.event.inputs.files }}
-          exclude: ${{ github.event.inputs.exclude }}
+          files: ${{ inputs.files }}
+          exclude: ${{ inputs.exclude }}

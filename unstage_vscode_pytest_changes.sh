@@ -19,7 +19,7 @@ for SETTING in $SETTINGS ; do
     echo "--- Checking $SETTING"
     Settings_change=$(git diff --cached --unified=0 "$SETTING" | grep -Po '(?<=^\+)(?!\+\+).*')
     echo "------ Settings change to pytestEnabled: $Settings_change"
-   if echo "$Settings_change" | grep -q 'pytestEnabled": true' ; then
+   if echo "$Settings_change" | jq -e '.["python.testing.pytestEnabled"] == true' ; then
       echo "------ pytestEnabled: true found in $SETTING"
       echo -e "\033[33m------ Unstaging $SETTING. If this is not what you want, run commit with SKIP=stage_vscode_pytest_changes git commit ...\033[0m"
       git reset "$SETTING"
