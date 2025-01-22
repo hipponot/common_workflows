@@ -9,10 +9,10 @@
   minimum_pre_commit_version: "2.9.2"
   stages:
     - commit-msg
-- id: stage_vscode_pytest_changes
-  name: stage_vscode_pytest_changes
-  description: "Stage vscode and pytest changes"
-  entry: ./stage_vscode_pytest_changes.sh
+- id: unstage_vscode_pytest_changes
+  name: unstage_vscode_pytest_changes
+  description: "Unstage vscode and pytest changes"
+  entry: ./unstage_vscode_pytest_changes.sh
   language: script
   args: []
   require_serial: true
