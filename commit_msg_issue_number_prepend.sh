@@ -25,5 +25,10 @@ fi
 
 
 if [ -n "$ISSUE_NUMBER" ]; then
-    echo "$REPO_PREPEND#$ISSUE_NUMBER" `cat $1`  > "$1"
+    COMMIT_MSG=$(cat "$1")
+    # Check if issue number is already in the commit message
+    if echo "$COMMIT_MSG" | grep -qE "(^|[^0-9])#$ISSUE_NUMBER([^0-9]|$)"; then
+        exit 0
+    fi
+    echo "$REPO_PREPEND#$ISSUE_NUMBER" "$COMMIT_MSG" > "$1"
 fi
