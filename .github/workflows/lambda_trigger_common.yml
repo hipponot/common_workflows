@@ -90,6 +90,7 @@ jobs:
       contents: read
       actions: read
     strategy:
+      fail-fast: false
       matrix:
         app_path: ${{fromJSON(needs.check_for_changes.outputs.pattern_matrix)}}
     with:
