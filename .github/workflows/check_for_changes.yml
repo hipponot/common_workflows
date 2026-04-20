@@ -40,23 +40,23 @@ jobs:
     outputs:
       pattern_matrix: ${{ steps.changes_in_app.outputs.pattern_matrix }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         if: github.event_name != 'pull_request'
         with:
           ref: ${{ inputs.default_branch }}
           fetch-depth: 2
           sparse-checkout:  ${{ inputs.sparse_checkout_dir }}
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         if: github.event_name == 'pull_request'
         with:
           ref: ${{ inputs.default_branch }}
           fetch-depth: 0
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         if: github.event_name != 'pull_request'
         with:
           fetch-depth: 2
           clean: false
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         if: github.event_name == 'pull_request'
         with:
           fetch-depth: 1

@@ -68,7 +68,7 @@ jobs:
       cancel-in-progress: true
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 1
           sparse-checkout: |
@@ -116,7 +116,7 @@ jobs:
             sam package \
               --output-template-file packaged.yaml \
               --s3-bucket ${{inputs.artifact_bucket}} \
-      - uses: actions/upload-artifact@v4.3.3
+      - uses: actions/upload-artifact@v4
         if: (steps.get_packaged.outcome!='success')
         with:
           name: sam_template_${{steps.file_hash.outputs.file_hash}}
@@ -141,7 +141,7 @@ jobs:
 
       - name: Set up Python
         id: py_setup
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Check deploy
